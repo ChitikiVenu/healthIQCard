@@ -2,13 +2,753 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Health IQ – Specialty Group Explorer</title>
+  <title>Healthcare Data Card | Nplus Global</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card-bg: rgba(15, 23, 42, 0.96);
+      --card-border: rgba(148, 163, 184, 0.45);
+      --accent: #0ea5e9;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --accent-strong: #0284c7;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --good: #22c55e;
+      --warn: #eab308;
+      --chip-bg: rgba(15, 23, 42, 0.85);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --shadow-strong: 0 28px 80px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 12px 40px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-strong);
+      padding: 22px 22px 20px;
+      backdrop-filter: blur(26px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08), transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(129, 140, 248, 0.1), transparent 55%);
+      opacity: 0.95;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.85);
+    }
+
+    .card-title-block {
+      max-width: 580px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .eyebrow-span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.38);
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+    }
+
+    .card-title {
+      font-size: clamp(22px, 3vw, 26px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: #f9fafb;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 520px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: var(--chip-bg);
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .chip-pill {
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--good);
+    }
+
+    .updated {
+      opacity: 0.85;
+    }
+
+    .metrics-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 960px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .card-header {
+        align-items: flex-start;
+      }
+      .card-meta {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px 10px 24px;
+      }
+      .card {
+        padding: 16px 14px 16px;
+        border-radius: 18px;
+      }
+      .card-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .section-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric-tile {
+      background: linear-gradient(
+          135deg,
+          rgba(15, 23, 42, 0.2),
+          rgba(15, 23, 42, 0.9)
+        ),
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%);
+      border-radius: 16px;
+      padding: 10px 11px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .metric-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #f9fafb;
+    }
+
+    .metric-footnote {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-pill {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e0f2fe;
+    }
+
+    .layout-main {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.5fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-main {
+        grid-template-columns: minmax(0, 1.9fr) minmax(0, 1.6fr);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .layout-main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+      padding: 13px 13px 11px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.85);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: #bae6fd;
+      white-space: nowrap;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 4px 0 6px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.85);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .tag-strong {
+      border-color: rgba(56, 189, 248, 0.7);
+      color: #e0f2fe;
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+
+    .mini-table thead {
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.95);
+      text-align: left;
+    }
+
+    .mini-table th {
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .mini-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .pill strong {
+      color: #e5e7eb;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .pill-success {
+      border-color: rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+    }
+
+    .pill-warn {
+      border-color: rgba(234, 179, 8, 0.7);
+      color: #facc15;
+    }
+
+    .list {
+      list-style: none;
+      margin-top: 6px;
+      display: grid;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .list-bullet {
+      margin-top: 4px;
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+      flex-shrink: 0;
+    }
+
+    .foot {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px dashed rgba(51, 65, 85, 0.95);
+      padding-top: 10px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.8);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.05));
+      color: #e0f2fe;
+      font-size: 11px;
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .cta span {
+      font-size: 13px;
+    }
+
+    .cta small {
+      opacity: 0.8;
+    }
+
+    .foot-note-strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
-  <!-- Our custom web component -->
-  <health-iq-browser></health-iq-browser>
+  <main class="page">
+    <section class="card">
+      <div class="card-inner">
+        <!-- Header -->
+        <header class="card-header">
+          <div class="card-title-block">
+            <div class="eyebrow">
+              <span class="eyebrow-span">
+                <span class="eyebrow-dot"></span>
+                HEALTHCARE DECISION-MAKER DATASET
+              </span>
+            </div>
+            <h1 class="card-title">
+              {{DATASET_NAME_OR_SEGMENT}} – Verified Healthcare Contacts
+            </h1>
+            <p class="card-subtitle">
+              A curated, compliance-ready marketing dataset built for high-performing healthcare
+              campaigns across {{PRIMARY_REGIONS}}. Includes email-verified decision makers across
+              hospitals, clinics, and healthcare networks.
+            </p>
+          </div>
 
-  <!-- Load the custom element, which loads the app -->
-  <script type="module" src="./custom-elements.js"></script>
+          <div class="card-meta">
+            <div class="chip-row">
+              <span class="chip chip-pill">
+                <span class="chip-dot"></span>
+                Deliverability: {{DELIVERABILITY_RATE}}%+
+              </span>
+              <span class="chip">
+                Update cadence: {{UPDATE_FREQUENCY}}
+              </span>
+              <span class="chip">
+                Source blend: Vendor + Public + 1st Party
+              </span>
+            </div>
+            <div class="updated">
+              Last refresh: <strong>{{LAST_REFRESH_DATE}}</strong> · Next scheduled: {{NEXT_REFRESH_CYCLE}}
+            </div>
+          </div>
+        </header>
+
+        <!-- Top metrics -->
+        <section class="metrics-grid">
+          <article class="metric-tile">
+            <div class="metric-label">
+              <span>TOTAL CONTACTS</span>
+              <span class="metric-tag">Unique HCP / HC Decision Makers</span>
+            </div>
+            <div class="metric-value">{{TOTAL_CONTACTS}}</div>
+            <div class="metric-footnote">
+              <span class="metric-pill">Emails: {{TOTAL_EMAILS}}</span>
+              <span>Direct dials: {{TOTAL_DIRECT_DIALS}}</span>
+            </div>
+          </article>
+
+          <article class="metric-tile">
+            <div class="metric-label">
+              <span>ORG COVERAGE</span>
+              <span class="metric-tag">{{ORG_COUNTS_LABEL}}</span>
+            </div>
+            <div class="metric-value">{{TOTAL_ORGANIZATIONS}}</div>
+            <div class="metric-footnote">
+              <span>Hospitals / Systems: {{HOSPITAL_SHARE}}%</span>
+              <span>Clinics / Groups: {{CLINIC_SHARE}}%</span>
+            </div>
+          </article>
+
+          <article class="metric-tile">
+            <div class="metric-label">
+              <span>GEOGRAPHY</span>
+              <span class="metric-tag">{{PRIMARY_COUNTRY_OR_REGION}}</span>
+            </div>
+            <div class="metric-value">{{COUNTRIES_OR_STATES_COUNT}}</div>
+            <div class="metric-footnote">
+              <span>Top regions: {{TOP_REGIONS_LIST}}</span>
+            </div>
+          </article>
+
+          <article class="metric-tile">
+            <div class="metric-label">
+              <span>QUALITY & COMPLIANCE</span>
+              <span class="metric-tag">Ready for campaigns</span>
+            </div>
+            <div class="metric-value">{{VERIFICATION_DEPTH}}</div>
+            <div class="metric-footnote">
+              <span>Hard-bounce rate &lt; {{BOUNCE_RATE}}%</span>
+            </div>
+          </article>
+        </section>
+
+        <!-- Main layout -->
+        <section class="layout-main">
+          <!-- LEFT: coverage & breakdown -->
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h2 class="panel-title">COVERAGE & SEGMENTATION</h2>
+                <p class="panel-subtitle">
+                  Built to segment by role, organization type, and region in seconds.
+                </p>
+              </div>
+              <span class="badge">Sales & marketing ready</span>
+            </header>
+
+            <!-- Roles / seniority -->
+            <div class="tag-row">
+              <span class="tag tag-strong">CXO & VP: {{CXO_VP_SHARE}}%</span>
+              <span class="tag">Directors / Heads: {{DIRECTOR_SHARE}}%</span>
+              <span class="tag">Managers / Leads: {{MANAGER_SHARE}}%</span>
+              <span class="tag">Clinical / Specialist roles: {{CLINICAL_SHARE}}%</span>
+            </div>
+
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Segment</th>
+                  <th>Contacts</th>
+                  <th>Share</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Hospital &amp; Health System Leaders</td>
+                  <td>{{SEGMENT1_CONTACTS}}</td>
+                  <td>{{SEGMENT1_SHARE}}%</td>
+                  <td>Strategy, digital, operations, finance</td>
+                </tr>
+                <tr>
+                  <td>Clinic &amp; Group Practice Decision Makers</td>
+                  <td>{{SEGMENT2_CONTACTS}}</td>
+                  <td>{{SEGMENT2_SHARE}}%</td>
+                  <td>Practice owners, medical directors, admin</td>
+                </tr>
+                <tr>
+                  <td>IT, Data &amp; Transformation Leaders</td>
+                  <td>{{SEGMENT3_CONTACTS}}</td>
+                  <td>{{SEGMENT3_SHARE}}%</td>
+                  <td>Health IT, analytics, interoperability</td>
+                </tr>
+                <tr>
+                  <td>Procurement &amp; Purchasing</td>
+                  <td>{{SEGMENT4_CONTACTS}}</td>
+                  <td>{{SEGMENT4_SHARE}}%</td>
+                  <td>Vendor selection &amp; budgeting</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <!-- RIGHT: geography, quality, use cases -->
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h2 class="panel-title">GEO, QUALITY & USE CASES</h2>
+                <p class="panel-subtitle">
+                  Where your campaigns can land, and how the data is kept campaign-ready.
+                </p>
+              </div>
+              <span class="badge">Nplus Global | Healthcare</span>
+            </header>
+
+            <!-- Geography table -->
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Region</th>
+                  <th>Contacts</th>
+                  <th>Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{REGION1_NAME}}</td>
+                  <td>{{REGION1_CONTACTS}}</td>
+                  <td>{{REGION1_SHARE}}%</td>
+                </tr>
+                <tr>
+                  <td>{{REGION2_NAME}}</td>
+                  <td>{{REGION2_CONTACTS}}</td>
+                  <td>{{REGION2_SHARE}}%</td>
+                </tr>
+                <tr>
+                  <td>{{REGION3_NAME}}</td>
+                  <td>{{REGION3_CONTACTS}}</td>
+                  <td>{{REGION3_SHARE}}%</td>
+                </tr>
+                <tr>
+                  <td>Long tail / other</td>
+                  <td>{{REGION_OTHER_CONTACTS}}</td>
+                  <td>{{REGION_OTHER_SHARE}}%</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Quality & compliance pills -->
+            <div class="tag-row" style="margin-top: 8px;">
+              <span class="pill pill-success">
+                <span class="pill-dot"></span>
+                <strong>Verification:</strong> {{VERIFICATION_PROCESS}} (email + phone)
+              </span>
+              <span class="pill">
+                <strong>Compliance:</strong> GDPR / CAN-SPAM aligned usage
+              </span>
+              <span class="pill pill-warn">
+                <strong>Recommended:</strong> Warm-up & targeting to maximise ROI
+              </span>
+            </div>
+
+            <!-- Use cases -->
+            <ul class="list">
+              <li>
+                <span class="list-bullet"></span>
+                <span>
+                  <strong class="foot-note-strong">Demand gen:</strong> pipeline for healthcare SaaS, devices, staffing, and
+                  consulting across {{PRIMARY_GEOGRAPHY}}.
+                </span>
+              </li>
+              <li>
+                <span class="list-bullet"></span>
+                <span>
+                  <strong class="foot-note-strong">ABM:</strong> target named hospital systems and clinic networks with
+                  role- and speciality-based outreach.
+                </span>
+              </li>
+              <li>
+                <span class="list-bullet"></span>
+                <span>
+                  <strong class="foot-note-strong">Territory planning:</strong> align sales coverage and field teams to
+                  the densest healthcare opportunity clusters.
+                </span>
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- Footer / CTA -->
+        <footer class="foot">
+          <div>
+            <div class="foot-note-strong">
+              Nplus Global · Healthcare Data
+            </div>
+            <div>
+              Custom cuts available by speciality, bed size, ownership, technology stack, and more.
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+            <a class="cta" href="mailto:Steve.d@nplusglobal.com?subject=Healthcare%20Data%20Card%20-%20Inquiry">
+              <span>↗</span>
+              <div>
+                Talk to a data specialist
+                <br />
+                <small>Steve.d@nplusglobal.com</small>
+              </div>
+            </a>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
